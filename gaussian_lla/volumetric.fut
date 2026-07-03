@@ -40,16 +40,15 @@ def radiance (p: (i64, i64))
   let f = focal_length
 
   -- distance of this pixel from the center of projection
-  let ell = if ortho_view_box > 0   
-              then f32.sqrt <| ((p_ndc.0 / f) * (p_ndc.0 / f)) + ((p_ndc.1 / f) * (p_ndc.1 / f)) + 1
-              else 1
+  -- we use ell in orthographic projection as well to better compare results to perspective projections
+  let ell = f32.sqrt <| ((p_ndc.0 / f) * (p_ndc.0 / f)) + ((p_ndc.1 / f) * (p_ndc.1 / f)) + 1
   let (final_radiance, _, _) =
     loop (radiance, T, depth) = (0f32, 1f32, -ell) -- start the loop with negative depth. use the opengl convention where -Z points "forward"
     while T > EPSILON && depth > max_depth do
       -- enter the loop with ray-space coordinate r = (p, depth). Convert r to camera space
       -- equation 27 in zwicker et al.
       let p_camera = if ortho_view_box > 0
-                        then (p_ndc.0 * ortho_view_box, p_ndc.1 * ortho_view_box, depth)
+                        then (-p_ndc.0 * ortho_view_box, -p_ndc.1 * ortho_view_box, depth)
                         else (depth * p_ndc.0 / (f * ell), depth * p_ndc.1 / (f * ell), depth / ell)
       
       -- convert camera-space coordinate to world space

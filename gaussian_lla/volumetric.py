@@ -175,8 +175,9 @@ def draw():
     server.put_value('delta', np.float32(params['delta']))
     server.put_value('max_depth', np.float32(params['max_depth']))
     server.put_value('mean', np.array([params['x'], params['y'], params['z']], dtype=np.float32))
+    server.put_value('ortho_view_box', np.float32(0))
     
-    server.cmd_call('rasterize', 'res', 'W', 'focal_length', 'camera', 'coef', 'conic', 'mean', 'delta', 'max_depth')
+    server.cmd_call('rasterize', 'res', 'W', 'focal_length', 'camera', 'coef', 'conic', 'mean', 'delta', 'max_depth', 'ortho_view_box')
     res = server.get_value('res')
 
     server.cmd_free('res')
@@ -188,6 +189,8 @@ def draw():
     server.cmd_free('coef')
     server.cmd_free('conic')
     server.cmd_free('mean')
+    server.cmd_free('ortho_view_box')
+    
     axes.cla()
     axes.imshow(1 - res, cmap='gray', vmin=0, vmax=1, origin='upper')
     draw_axes_overlay(axes, cam, params['f'], params['W'])
